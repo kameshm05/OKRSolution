@@ -55,6 +55,7 @@ import FormLabel from "@material-ui/core/FormLabel";
 import { IObjective, IEditObj } from "./IOkrProps";
 import "alertifyjs";
 import '../../../ExternalRef/CSS/alertify.min.css';
+import '../../../ExternalRef/CSS/style.css';
 var alertify: any = require("../../../ExternalRef/JS/alertify.min.js");
 const formContainer = {
   display: "flex",
@@ -202,8 +203,8 @@ class EditObjective extends React.Component<IEditObj, any> {
             </Select>
           </FormControl>
 
-          <FormControlLabel
-            control={<Checkbox color="primary" name="checkedB" checked={!this.state.IsPrivate} onChange={(e) => this.handlePrivate(e)} />}
+          <FormControlLabel className="check-margin"
+            control={<Checkbox  color="primary" name="checkedB" checked={!this.state.IsPrivate} onChange={(e) => this.handlePrivate(e)} />}
             label="Public"
           />
 

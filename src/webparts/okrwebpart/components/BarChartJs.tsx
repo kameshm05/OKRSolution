@@ -9,6 +9,7 @@ import { Bar } from 'react-chartjs-2';
 import { MSGraphClient } from "@microsoft/sp-http";
 import * as MicrosoftGraph from "@microsoft/microsoft-graph-types";
 import { GraphError } from "@microsoft/microsoft-graph-client";
+import "../../../ExternalRef/CSS/style.css"; 
 var users = [];
 var scaleXarray = [];
 var filterQuery: any = "";
@@ -57,25 +58,31 @@ export default class BarChartJs extends React.Component<any, any> {
   }
 
   async getDepartmentUsers(departmentUser, usersArray) {
+    var filterArray=[];
+    var query="";
+
     departmentUser.map((element, deptindex) => {
       var deptUsersarr = usersArray.filter((user, index) => {
         return user.department == element.department
       });
+       query="";
       deptUsersarr.map((fillQuery, index) => {
-        filterQuery = filterQuery + "Author/EMail eq '" + fillQuery.mail + "' or "
+        query = query + "Owner/EMail eq '" + fillQuery.mail + "' or "
       });
+      query = query.substring(0, query.length - 4)
+
+      filterArray.push(query)
     });
-    filterQuery = filterQuery.substring(0, filterQuery.length - 4)
-    this.getDepartmentProgress(filterQuery, departmentUser);
+    this.getDepartmentProgress(query, departmentUser,filterArray);
   }
 
-  async getDepartmentProgress(filterQuery, departmentUser) {
-    await sp.web.lists.getByTitle("Objectives").items.select("Title,Progress").filter(filterQuery).get().then(function (userobjdata) {
+  async getDepartmentProgress(filterQuery, departmentUser,filterArray) {
+    for (let i = 0; i < departmentUser.length; i++) {
+      scaleXarray.push(departmentUser[i].department);
+    }
+    for (let i = 0; i < filterArray.length; i++) {
 
-      for (let i = 0; i < departmentUser.length; i++) {
-        scaleXarray.push(departmentUser[i].department);
-      }
-
+    await sp.web.lists.getByTitle("Objectives").items.select("Title,Progress").filter(filterArray[i]).get().then(function (userobjdata) {
       if (userobjdata.length > 0) {
         userobjdata.map((objData, i) => {
           if (i == 0) {
@@ -105,6 +112,8 @@ export default class BarChartJs extends React.Component<any, any> {
         barColorArray.push('#282930');
     });
 
+  }
+
     var data = {
       labels: scaleXarray,
       datasets: [
@@ -129,7 +138,7 @@ export default class BarChartJs extends React.Component<any, any> {
 
   public render(): React.ReactElement {
     return (
-      <div>
+      <div className="graphsize">
         <Bar
           data={this.state.metadata}
           ref={(reference) => this.chartReference = reference}
@@ -142,6 +151,20 @@ export default class BarChartJs extends React.Component<any, any> {
             legend: {
               display: false,
               position: 'right'
+            },scales: {         
+              xAxes: [ 
+                {
+                  ticks: {
+                    callback: function(label) {
+                      if (/\s/.test(label)) {
+                        return label.split(" ");
+                      }else{
+                        return label;
+                      }              
+                    }
+                  }
+                }
+              ]
             }
           }}
         />

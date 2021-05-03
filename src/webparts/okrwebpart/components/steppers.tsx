@@ -118,12 +118,18 @@ class HorizontalLinearStepper extends React.Component<IStepper, any> {
   public handleReset = () => { };
 
   public handleFinish = () => {
-    if (this.state.count <= 5) {
+    if (this.state.count < 5) {
       this.addAnotherKR((res) => {
         if (res) {
           this.props.dialogOpen(false);
         }
+
       });
+    }
+    else
+    {
+      this.props.dialogOpen(false);
+
     }
 
     //this.props.refresh(true);
@@ -187,7 +193,7 @@ class HorizontalLinearStepper extends React.Component<IStepper, any> {
                     <div className="button-group">
                       {/* <Button disableElevation variant="contained" size="small" onClick={that.handleBack}>Back</Button> */}
                       <Button
-                        disabled={that.state.count === 5}
+                        disabled={that.state.count === 4}
                         onClick={that.addAnotherKR}
                         variant="contained" size="small"
                         disableElevation

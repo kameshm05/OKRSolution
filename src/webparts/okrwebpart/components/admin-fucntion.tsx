@@ -23,6 +23,7 @@ import { IEmailProperties } from "@pnp/sp/sputilities";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import "alertifyjs";
 import '../../../ExternalRef/CSS/alertify.min.css';
+import '../../../ExternalRef/CSS/style.css';
 var alertify: any = require("../../../ExternalRef/JS/alertify.min.js");
 // Top 100 films as rated by IMDb users. http://www.imdb.com/chart/top
 const top100Films = [];
@@ -42,8 +43,7 @@ export default class AppAdminFunctionComponent extends React.Component<any, any>
 
         };
     alertify.set("notifier", "position", "top-right"); 
-this.loadAllDepartments();
-      this.loadAllObjectives();
+      this.loadAllDepartments();
     }
     public loadAllDepartments = () => {
         this.props.graphClient.api("/users").select('Department,mail,displayName,Id').get((error, response) => {
@@ -56,11 +56,14 @@ this.loadAllDepartments();
                   owners.push({
                       Id: element.id,
                       Title: element.displayName,
-                      EMail: element.mail,
+                      EMail:element.mail? element.mail.toLowerCase():"",
                   });
             //   }
           }
-          this.setState({  allUsers: owners, receiveUsers: owners, sendUsers: owners });
+        //   this.setState({  allUsers: owners, receiveUsers: owners, sendUsers: owners });
+          this.setState({  allUsers: owners });
+          this.loadAllObjectives();
+
         });
       }
     public loadAllObjectives = () => {
@@ -75,25 +78,43 @@ this.loadAllDepartments();
                 "Progress",
                 "Description",
                 "CompletionDate",
+                "DeletedDate",
                 "IsPredefined"
             )
             .expand("Owner")
             .get()
             .then((items: any[]) => {
-                items = items.filter(c => c.IsPredefined == false);
-                var owners = [];
+                // items = items.filter(c => c.IsPredefined == false);
+                var owners = this.state.allUsers;
+                var sender=[];
+                var receiver=[];
                 for (let index = 0; index < items.length; index++) {
                     const element = items[index];
-                    var fdata = owners.filter(c => c.Id == element.Owner.Id);
-                    if (fdata.length == 0) {
-                        owners.push({
+                var owners = owners.filter(c => c.EMail != element.Owner.EMail.toLowerCase());
+                var rData= sender.filter(r => r.Id == element.Owner.Id);
+                    // if (!element.DeletedDate&&fdata.length==0) {
+                    //     receiver.push({
+                    //         Id: element.Owner.Id,
+                    //         Title: element.Owner.Title,
+                    //         EMail: element.Owner.EMail,
+                    //     });
+                    // }
+
+                    if(element.DeletedDate&&rData.length==0)
+                    {
+                        sender.push({
                             Id: element.Owner.Id,
                             Title: element.Owner.Title,
                             EMail: element.Owner.EMail,
                         });
                     }
                 }
-                this.setState({ allObjectives: items, copyObjectives: items });
+             
+
+                console.log(owners);
+                console.log(receiver);
+                
+                this.setState({ allObjectives: items, copyObjectives: items, receiveUsers: owners, sendUsers: sender  });
 
                 //this.setState({ allObjectives: items, copyObjectives: items, allUsers: owners, receiveUsers: owners, sendUsers: owners });
             });
@@ -134,8 +155,8 @@ this.loadAllDepartments();
             sp.web.siteUsers.getByEmail(value.EMail).get().then((UserData:any)=>{
                this.setState({senderId: UserData.Id})
            });
-            for (let index = 0; index < this.state.allUsers.length; index++) {
-                const user = this.state.allUsers[index];
+            for (let index = 0; index < this.state.receiveUsers.length; index++) {
+                const user = this.state.receiveUsers[index];
                 if (user.Id != value.Id) {
                     users.push(user);
                 } else {
@@ -151,7 +172,7 @@ this.loadAllDepartments();
             }
             this.setState({ senderObjectives: senderObjectives, senderTitle: value.Title,  receiveUsers: users });
         } else {
-            this.setState({ senderObjectives: [], senderTitle: null, senderId: null, receiveUsers: this.state.allUsers });
+            this.setState({ senderObjectives: [], senderTitle: null, senderId: null, receiveUsers: this.state.receiveUsers });
         }
     }
 
@@ -161,8 +182,8 @@ this.loadAllDepartments();
             sp.web.siteUsers.getByEmail(value.EMail).get().then((UserData:any)=>{
                 this.setState({receiverId: UserData.Id})
             });
-            for (let index = 0; index < this.state.allUsers.length; index++) {
-                const user = this.state.allUsers[index];
+            for (let index = 0; index < this.state.receiveUsers.length; index++) {
+                const user = this.state.receiveUsers[index];
                 if (user.Id != value.Id) {
                     users.push(user);
                 } else {
@@ -176,9 +197,9 @@ this.loadAllDepartments();
             for (let index = 0; index < copy.length; index++) {
                 receiverObjectives.push(copy[index]);
             }
-            this.setState({ receiverObjectives: receiverObjectives, receiverTitle: value.Title, sendUsers: users });
+            this.setState({ receiverObjectives: receiverObjectives, receiverTitle: value.Title, sendUsers: this.state.sendUsers });
         } else {
-            this.setState({ receiverObjectives: [], receiverTitle: null, receiverId: null, sendUsers: this.state.allUsers });
+            this.setState({ receiverObjectives: [], receiverTitle: null, receiverId: null, sendUsers: this.state.sendUsers });
         }
     }
 
@@ -206,13 +227,13 @@ this.loadAllDepartments();
         for (let index = 0; index < toobj.length; index++) {
             const element = toobj[index];
             objectivesName = objectivesName + toobj[index].Title + '<br/>';
-            await sp.web.lists.getByTitle("Objectives").items.getById(element.ID).update({ OwnerId: this.state.receiverId }).then(() => {
+            await sp.web.lists.getByTitle("Objectives").items.getById(element.ID).update({ OwnerId: this.state.receiverId , DeletedDate:null}).then(() => {
             });
 
             if ((index + 1) == toobj.length) {
                 const emailProps: IEmailProperties = {
                     To: [this.state.receiverDetail.EMail],
-                    Subject: this.state.senderDetail.Title + " objectives are transfered to you",
+                    Subject: this.state.senderTitle + " objectives are transfered to you",
                     Body: 'Objectives:-<br/>' + objectivesName,
                     AdditionalHeaders: {
                         "content-type": "text/html",
@@ -262,7 +283,7 @@ this.loadAllDepartments();
                                             label="Select All"
                                         />
 
-                                        : <h3>No Objectives to display</h3>
+                                        : <h3 className="no-obj">No Objectives to display</h3>
                                 }
          
                                     <Table size="small" className="senderTable">

@@ -40,6 +40,10 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
 import ApiService from "../../../services/ApiService";
+import "alertifyjs";
+
+import "../../../ExternalRef/CSS/alertify.min.css";
+var alertify: any = require("../../../ExternalRef/JS/alertify.min.js");
 var moment: any = require("moment");
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({ 
@@ -306,8 +310,16 @@ export default function OkrList(props) {
     
     
     var value = (document.getElementById(eid) as HTMLInputElement).value;
-    if (value && parseInt(value) <= 100) {
-      handleChangeCommit(parseInt(value), that[parseInt(event.currentTarget.id)]);
+    var format = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+    var checkedval=format.test(value) 
+    if (value && parseInt(value) <= 100&&!checkedval) {
+      (document.getElementById(eid) as HTMLInputElement).value="";
+        handleChangeCommit(parseInt(value), that[parseInt(event.currentTarget.id)]);
+    }
+    else
+    {
+      alertify.error('Please enter 1 to 100'); 
+
     }
   };
 
@@ -364,6 +376,7 @@ export default function OkrList(props) {
                 <TextField
                   className="krInput"
                   id={i + ''}
+                 
                   //  onChange={handleInputChange}
                   //  onBlur={handleInputChangeBlur}
                   type="number" //number
@@ -372,7 +385,9 @@ export default function OkrList(props) {
                   }}
                   InputProps={{ inputProps: { min: 0, max: 10 } }}
                   placeholder={kr.currentProgress}
+               
                 />
+                <span className="percentage">%</span>
                 <IconButton className="buttonDone"  >
                   <DoneIcon  id={i + ''} onClick={handleInputChangeBlur} />
                 </IconButton>
@@ -437,7 +452,7 @@ export default function OkrList(props) {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Warning"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">{"Confirmation"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Do you want to mark this objective as complete ?
@@ -457,3 +472,6 @@ export default function OkrList(props) {
     </div>
   );
 }
+
+
+

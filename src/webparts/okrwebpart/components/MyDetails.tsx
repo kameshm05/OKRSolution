@@ -51,6 +51,7 @@ import ApiService from "../../../services/ApiService";
 import "alertifyjs";
 
 import "../../../ExternalRef/CSS/alertify.min.css";
+import "../../../ExternalRef/CSS/style.css";
 var alertify: any = require("../../../ExternalRef/JS/alertify.min.js");
 var moment: any = require("moment");
 var departmentSummary = [];
@@ -87,6 +88,7 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
       ischecked: false,
       selectedType: "",
       refresh: false,
+      objectivePercentage:0
     };
     alertify.set("notifier", "position", "top-right");
   }
@@ -95,6 +97,8 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
   private listName = "Objectives";
   private krArray = [];
   private krlistName = "KeyResults";
+  public objectivePercentage = 0;
+
   //private selectedType: string;
 
   public componentDidMount() {
@@ -402,6 +406,7 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
                 .items.getById(this.objId)
                 .update({ Progress: avg })
                 .then((rs) => {
+                  this.setState({krtitle:""})
                   this.handleObjRefresh();
                   this.handlekeyRefresh();
                 });
@@ -450,7 +455,7 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
       <div>
         <Card square={true} elevation={0}>
           {this.state.isHidden ? (
-            <div className={"pageTitle"}>
+            <div className={"pageTitle completed-obj"}>
               <div className="title-progress">
                 <h3 className={"nomargin"}>Completed Objectives</h3>
               </div>
@@ -472,8 +477,9 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
               ""
             )}
 
-          {this.state.isHidden
-            ? this.state.objectives.length > 0 &&
+          {this.state.isHidden&&this.state.objectives.filter((eachitem,i)=>{
+              return eachitem.isCompleted
+            }).length>0?
             this.state.objectives.map((item, index) => {
               if (item.isCompleted) {
 
@@ -488,7 +494,7 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
                 // }
 
                 return (
-                  <div>
+                  <div className="completed-obj">
                     <Accordion
                       className="accordion"
                       square={true}
@@ -598,8 +604,8 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
                   </div>
                 );
               }
-            })
-            : ""}
+            }):this.state.isHidden?<h4 className="no-obj">No objectives to display</h4>:""
+           }
 
           {!this.state.isHidden && (
             <CardContent>
@@ -642,7 +648,11 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
               </div>
 
               <div className="OnGoingObject">
-                {this.state.objectives.length > 0 &&
+                {
+                this.state.objectives.length > 0&&this.state.objectives.filter((eachi,i)=>{
+                  return !eachi.isCompleted
+                }).length>0 ?
+                
                   this.state.objectives.map((item, index) => {
                     if (!item.isCompleted) {
                       var currentDate = moment(new Date());
@@ -746,7 +756,7 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
                                   refresh={this.handleObjRefresh}
                                   refreshkey={this.handlekeyRefresh}
                                 ></OkrList>
-                              ) : null}
+                              ) :null}
 
                             {this.state.itemID == item.id ? (
                               this.state.showfields ? (
@@ -878,7 +888,9 @@ export default class MyDetails extends React.Component<IMyDetailsProps, any> {
                         </Accordion>
                       );
                     }
-                  })}
+                  }):<h3 className="no-obj">No objectives to display</h3>
+                  
+                  }
 
               </div>
             </CardContent>

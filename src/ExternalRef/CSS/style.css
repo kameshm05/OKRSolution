@@ -267,10 +267,27 @@ input[type=number] {
   color: #ffffff !important;
   background-color: #a7a9aa !important
 }
-.chartjs-size-monitor{
- 
-}
+
 #myChart{
   width: 500px !important;
   height: 500px !important;
+}
+.graphsize {
+  width: 60vw;
+  margin: auto;
+}
+.btnsCentering button {
+  box-shadow: 0 2px 7px -2px #b3b3b3;
+}
+.completed-obj{
+  padding:20px;
+}
+
+.check-margin
+{
+  margin-bottom: 10px;
+}
+.no-obj
+{
+  margin-left: 35px;
 }

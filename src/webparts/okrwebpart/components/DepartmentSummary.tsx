@@ -93,6 +93,9 @@ interface IState {
   userWithDirectReports: any[];
   currentUserMail: string;
   allUsers: any[];
+  deptSelected:boolean;
+  managerSelected:boolean;
+
 }
 
 var userWithDirectReports = [];
@@ -126,7 +129,9 @@ export default class DepartmentSummary extends React.Component<
       selManager: {},
       userWithDirectReports: [],
       currentUserMail: '',
-      allUsers: []
+      allUsers: [],
+      deptSelected:true,
+      managerSelected:false
     };
     departmentSummary = [];
     this.getDepartment();
@@ -552,15 +557,16 @@ export default class DepartmentSummary extends React.Component<
   }
 
   public setDepartment = (event: React.ChangeEvent<any>) => {
+    this.setState({managerSelected:false,deptSelected:true});
     this.getDepartmentUsers(event.target.value);
-    this.setState({ departmentName: event.target.value });
+    this.setState({ departmentName: event.target.value});
     this.setState({ selManager: null });
   }
 
   public setManager = (event: React.ChangeEvent<any>) => {
     var manager = event.target.value;
     var directReports = manager.DirectReports;
-    this.setState({ selManager: manager });
+    this.setState({ selManager: manager , managerSelected:true,deptSelected:false});
     this.setState({ departmentName: null });
     // var filter = '';
     // for (let i = 0; i < directReports.length; i++) {
@@ -599,10 +605,19 @@ export default class DepartmentSummary extends React.Component<
   }
 
   public getHierarchyUsers = (departmentusers) => {
-    var filteredUsers = this.processHierarchy(departmentusers, []);
-    this.topLevelHierarchy(departmentusers[0].mail);
-    users = filteredUsers;
-    Array.prototype.push.apply(users, topLevelUsers);
+    var filteredUsers=[];
+    if(this.state.managerSelected)
+    {
+       filteredUsers = this.processHierarchy(departmentusers, []);
+      this.topLevelHierarchy(departmentusers[0].mail);
+      users = filteredUsers;
+      Array.prototype.push.apply(users, topLevelUsers);
+    }
+    else if(this.state.deptSelected)
+    {
+       filteredUsers = departmentusers
+    }
+
     var filter = "";
     for (let i = 0; i < filteredUsers.length; i++) {
       if (i == (filteredUsers.length - 1)) {
@@ -688,6 +703,7 @@ export default class DepartmentSummary extends React.Component<
         "Description",
         "CompletionDate",
         "IsPredefined",
+        "IsPrivate",
         "PredefinedObjectives/ID",
         "PredefinedObjectives/Title"
       )

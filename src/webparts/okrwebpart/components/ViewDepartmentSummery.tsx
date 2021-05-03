@@ -17,7 +17,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Slider from '@material-ui/core/Slider';
 import TextField from "@material-ui/core/TextField";
-
+import PublishIcon from '@material-ui/icons/Publish'; 
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
@@ -41,6 +41,7 @@ import * as React from "react";
 
 import OkrList from "./List";
 import EditObjective from "./EditObjective";
+import DeleteObjective from "./DeleteObjective";
 
 import ApiService from "../../../services/ApiService";
 
@@ -113,7 +114,8 @@ class ViewDepartmentSummery extends React.Component<IViewDepartment, any> {
                 Math.floor((new Date(items[i].Created).getMonth() + 3) / 3) +
                 "-" +
                 new Date(items[i].Created).getFullYear(),
-              Logs: items[i].Logs
+              Logs: items[i].Logs,
+              IsPrivate:items[i].IsPrivate
             });
 
             var findindex = -1;
@@ -187,7 +189,9 @@ class ViewDepartmentSummery extends React.Component<IViewDepartment, any> {
                 Math.floor((new Date(items[i].Created).getMonth() + 3) / 3) +
                 "-" +
                 new Date(items[i].Created).getFullYear(),
-              Logs: items[i].Logs
+              Logs: items[i].Logs,
+              IsPrivate:items[i].IsPrivate,
+              PredefinedObjectivesId:items[i].PredefinedObjectivesId
             };
 
             objArray.push(objective);
@@ -237,6 +241,22 @@ class ViewDepartmentSummery extends React.Component<IViewDepartment, any> {
 
   public handleDialog = (e) => {
     this.setState({ showhide: false });
+  }
+
+  public setCompleteObj = (item) => {
+    let objective = {
+      IsCompleted: true,
+      CompletedDate:new Date()
+    };
+    ApiService.edit("Objectives", objective, item.id)
+      .then((item: any) => {
+        console.log("Objectives updated success");
+        this.handleObjRefresh();
+        alertify.success("Objectives completed");
+      })
+      .catch((error: any[]) => {
+        console.log(error);
+      });
   }
 
   public handleKRType = (event, id) => {
@@ -362,7 +382,9 @@ class ViewDepartmentSummery extends React.Component<IViewDepartment, any> {
           (this.state.isManager || this.props.isAdmin) ?
 
             <div className="OnGoingObject">
-              {this.state.objectiveList.length > 0 &&
+              {this.state.objectiveList.length > 0 &&this.state.objectiveList.filter((eachi,i)=>{
+                  return !eachi.isCompleted
+                }).length>0 ?
                 this.state.objectiveList.map((item, index) => {
                   if (!item.isCompleted) {
                     var currentDate = moment(new Date());
@@ -425,6 +447,19 @@ class ViewDepartmentSummery extends React.Component<IViewDepartment, any> {
                             </span>
                           </div>
                           <div className="button-right">
+                          {
+                                item.progress
+                                  ? ((Math.round(parseFloat(item.progress)) == 100 && !item.isCompleted) ?
+                                    <IconButton
+                                      className="button-sm"
+                                      color="primary"
+                                      onClick={(e) => this.setCompleteObj(item)}
+                                    >
+                                      <PublishIcon /> 
+                                    </IconButton>
+                                    : "")
+                                  : ""
+                              }
                             <IconButton
                               className="button-sm"
                               color="primary"
@@ -576,14 +611,16 @@ class ViewDepartmentSummery extends React.Component<IViewDepartment, any> {
                       </Accordion>
                     );
                   }
-                })}
+                }):<h3>No Objectives to display</h3>}
 
             </div>
 
             :
 
             <div className="OnGoingObject">
-              {this.state.objectiveList.length > 0 &&
+              {this.state.objectiveList.length > 0 &&this.state.objectiveList.filter((eachi,i)=>{
+                  return !eachi.isCompleted
+                }).length>0 ?
                 this.state.objectiveList.map((item, index) => {
                   if (!item.isCompleted) {
                     var currentDate = moment(new Date());
@@ -707,7 +744,7 @@ class ViewDepartmentSummery extends React.Component<IViewDepartment, any> {
                       </Accordion>
                     );
                   }
-                })}
+                }):<h3>No objectives to display</h3>}
 
             </div>
         }
@@ -720,6 +757,18 @@ class ViewDepartmentSummery extends React.Component<IViewDepartment, any> {
               handleClose={this.closeEditObj}
               item={this.state.item}
             ></EditObjective>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={this.state.deleteObjective}
+          className="modalPopupObjective"
+        >
+          <DialogContent>
+            <DeleteObjective
+              handleClose={this.closeDeleteObj}
+              item={this.state.item}
+            ></DeleteObjective>
           </DialogContent>
         </Dialog>
 

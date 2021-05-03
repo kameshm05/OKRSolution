@@ -94,7 +94,7 @@ import * as FileSaver from "file-saver";
 import "alertifyjs";
 import '../../../ExternalRef/CSS/alertify.min.css';
 var alertify: any = require("../../../ExternalRef/JS/alertify.min.js");
-
+import "../../../ExternalRef/CSS/style.css"; 
 var moment: any = require("moment");
 
 var companySummary = [];
@@ -314,6 +314,7 @@ export default class CompanySummary extends React.Component<
                 InputProps={{ inputProps: { min: 0, max: 10 } }}
                 placeholder={rowData.Progress}
               />
+              <span className="percentage">%</span>
               <IconButton className="buttonDone"  >
                 <DoneIcon id={rowData.ID}  onClick={this.handleInputChangeBlur} />
               </IconButton>
@@ -495,7 +496,7 @@ export default class CompanySummary extends React.Component<
                         columns={this.props.isAdmin ? adminColumns : columns}
                         data={this.state.companyObjectives}
                       />
-                    </div>
+                    </div> 
                   )
               }
 

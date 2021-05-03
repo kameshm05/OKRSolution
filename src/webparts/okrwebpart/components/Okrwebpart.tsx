@@ -111,7 +111,9 @@ interface IState {
   isAdmin: boolean;
 }
 
-var azureGroupId = 'dbcf4df3-f741-4499-b8b1-673abfbd6a5c';
+// var azureGroupId = 'dbcf4df3-f741-4499-b8b1-673abfbd6a5c'; // for development
+var azureGroupId = 'dfedec5a-f0de-4cc9-8c67-1a8bdc753316'; //for live
+
 
 export default class Okrwebpart extends React.Component<
   IOkrwebpartProps,

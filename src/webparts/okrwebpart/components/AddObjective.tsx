@@ -245,7 +245,7 @@ class AddObjective extends React.Component<{}, any> {
           </Select>
         </FormControl>
 
-        <FormControlLabel
+        <FormControlLabel className="check-margin"
           control={<Checkbox color="primary" name="checkedB" onChange={(e) => this.handlePrivate(e)} />}
           label="Public"
         />

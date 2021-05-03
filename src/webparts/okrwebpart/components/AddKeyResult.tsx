@@ -121,6 +121,7 @@ class AddKeyResult extends React.Component<IAddKey, any> {
       krdate: "",
       progressType: [],
     });
+   
     ApiService.gettype(this.krlistName).then(
       (items: any) => {
         if (items != null && items != undefined && items.Choices.length > 0) {
@@ -256,7 +257,7 @@ class AddKeyResult extends React.Component<IAddKey, any> {
               variant="outlined"
             />
             : ''
-        } */}
+        } */} 
 
         {/* <TextField
           autoFocus

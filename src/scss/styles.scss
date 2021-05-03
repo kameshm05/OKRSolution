@@ -125,7 +125,7 @@ body {
 
     p {
       &.MuiTypography-root {
-        width: 35%;
+        width: 32%;
       }
     }
   }
@@ -201,7 +201,7 @@ body {
       }
 
       .MuiListItemText-root {
-        max-width: calc(36% - 60px);
+        max-width: calc(33% - 60px);
         padding-left: 75px;
       }
     }
@@ -584,4 +584,15 @@ table {
 #myChart,#myPieChart,#myBarChart{
   width: 500px !important;
   height: 500px !important;
+}
+span.percentage {
+  color: #85714d;
+  margin-left: 5px;
+  font-size: 17px;
+  position: relative;
+  top: 2px;
+}
+// maasi
+.MuiBadge-root{
+  max-width: 85%;
 }
